@@ -3,8 +3,8 @@ use ieee.std_logic_1164.all;
 
 entity fifo is
   generic(
-    WIDTH : positive := 8; -- Number of bits in a FIFO word.
-    DEPTH : positive := 8-- Number of words that the FIFO is capable of storing.
+    WIDTH   : positive := 8; -- Number of bits in a FIFO word.
+    DEPTH   : positive := 8-- Number of words that the FIFO is capable of storing.
   );
   port(
     reset_n : in  std_logic; -- Active low signal. Assert to reset the module.
@@ -106,7 +106,7 @@ begin
         
       end if;
     
-      -- Allow writing to the FIFO only if it is NOT full.
+      -- Allow writing to the FIFO ONLY if it is NOT full.
       if sequential_outputs.full = '0' then
       
         -- Write the data present on the 'back' port to the memory location
