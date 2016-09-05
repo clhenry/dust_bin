@@ -26,7 +26,7 @@ end entity;
 
 
 
-architecture rtl of circuit_interrupt_monitor is
+architecture behavioral of circuit_interrupt_monitor is
 
   constant NANOSECONDS_PER_SECOND : time := 1000000000 ns;
   constant CLOCK_CYCLE_PERIOD     : time := NANOSECONDS_PER_SECOND / CLOCK_FREQUENCY_HZ;
@@ -55,26 +55,27 @@ architecture rtl of circuit_interrupt_monitor is
 
 begin
 
-
-
   process(sequential_outputs, data_ready_n) is
+  
     variable combinatorial_logic : signals_struct_t;
+    
   begin
 
-    data_ready <= sequential_outputs.data_ready;
+    data_ready          <= sequential_outputs.data_ready;
+    
     combinatorial_logic := sequential_outputs;
 
     -- Deassert the data_ready pulse if it was previously asserted. 
     if sequential_outputs.data_ready = '1' then
- -- {
+    
       combinatorial_logic.data_ready        := '0';
- -- }  
+      
     end if;
     
     combinatorial_logic.counter             := sequential_outputs.counter + 1;
     
     case sequential_outputs.state is
- -- {
+    
       -- Wait for the data_ready_n signal to go low then bring the counter out
       -- of reset. Proceed to the next state where the the module will wait for
       -- the data_ready_n signal to go high. 
@@ -83,32 +84,32 @@ begin
         -- The data_ready_n signal is pulled up with a 10K resisitor. The only
         -- way it will go low is if it is actively driven low by the ADC.
         if data_ready_n = '0' then
-     -- {
+        
           combinatorial_logic.state         := WAIT_FOR_INTERRUPT_DEASSERTION;
-     -- }
+          
         else
-     -- {
+        
           combinatorial_logic.counter       := 0;
-     -- }
+          
         end if;
         
       when WAIT_FOR_INTERRUPT_DEASSERTION =>
         if data_ready_n = '1' then
-     -- {
-          if sequential_outputs.counter = (COUNT_PER_DATA_READY_ASSERTION_PERIOD - 1) then
-       -- {
-            combinatorial_logic.data_ready  := '1';  
-       -- }
-          end if;
         
+          if sequential_outputs.counter = (COUNT_PER_DATA_READY_ASSERTION_PERIOD - 1) then
+          
+            combinatorial_logic.data_ready  := '1';  
+            
+          end if;
+          
           combinatorial_logic.counter       := 0;
           combinatorial_logic.state         := WAIT_FOR_INTERRUPT_ASSERTION;
-     -- }
+          
         end if;        
         -- The data_ready_n signal should be high for no more than the expected
         -- deassertion time. If it is then something went wrong and it can be assumed
         -- that the signal is no longer valid.
- -- }    
+        
     end case;
     
     sequential_inputs <= combinatorial_logic;
@@ -118,18 +119,16 @@ begin
   process(reset_n, clock) is
   begin
     if reset_n = '0' then
- -- {
+    
       sequential_outputs.counter            <= 0;
       sequential_outputs.data_ready         <= '0';
       sequential_outputs.state              <= WAIT_FOR_INTERRUPT_ASSERTION;
- -- }
+      
     elsif rising_edge(clock) then
- -- {
+    
       sequential_outputs                    <= sequential_inputs;
- -- }
+      
     end if;
   end process;
 
-
-
-end rtl;
+end behavioral;
