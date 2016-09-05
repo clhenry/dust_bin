@@ -1,0 +1,5 @@
+1) The interrupt triggered by any of the AD7913 will start an aquisition.
+
+2) After the first data ready pulse is captured then wait a predefined period
+   for the pulses from the other circuit monitors. If they don't come within
+   that period then the circuit monitors are considered out of sync.
